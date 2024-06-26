@@ -1,3 +1,4 @@
+
 living_situation <- function(ReferenceNo) {
   case_when(
     ReferenceNo == 8 ~ "Client doesn't know",
@@ -207,6 +208,104 @@ monthshomeless_type <- function(ReferenceNo){
   )
 }
 
+assessmentlevel_type <- function(ReferenceNo){
+  case_when(
+    ReferenceNo == 1 ~ "Crisis Needs Assessment",
+    ReferenceNo == 2 ~ "Housing Needs Assessment"
+  )
+}
+
+prioritization_type <- function(ReferenceNo){
+  case_when(
+    ReferenceNo == 1 ~ "Placed on prioritization list",
+    ReferenceNo == 2 ~ "Not placed on prioritization list"
+  )
+}
+
+
+event_type <- function(ReferenceNo){
+  case_when(
+    ReferenceNo == 1 ~ "Referral to Prevention Assistance project",
+    ReferenceNo == 2 ~ "Problem Solving/Diversion/Rapid Resolution intervention or service",
+    ReferenceNo == 3 ~ "Referral to scheduled Coordinated Entry Crisis Needs Assessment",
+    ReferenceNo == 4 ~ "Referral to scheduled Coordinated Entry Housing Needs Assessment",
+    ReferenceNo == 5 ~ "Referral to Post-placement/ follow-up case management",
+    ReferenceNo == 6 ~ "Referral to Street Outreach project or services",
+    ReferenceNo == 7 ~ "Referral to Housing Navigation project or services",
+    ReferenceNo == 8 ~ "Referral to Non-continuum services: Ineligible for continuum services",
+    ReferenceNo == 9 ~ "Referral to Non-continuum services: No availability in continuum services",
+    ReferenceNo == 10 ~ "Referral to Emergency Shelter bed opening",
+    ReferenceNo == 11 ~ "Referral to Transitional Housing bed/unit opening",
+    ReferenceNo == 12 ~ "Referral to Joint TH-RRH project/unit/resource opening",
+    ReferenceNo == 13 ~ "Referral to RRH project resource opening",
+    ReferenceNo == 14 ~ "Referral to PSH project resource opening",
+    ReferenceNo == 15	~ "Referral to Other PH project/unit/resource opening",
+    ReferenceNo == 16	~ "Referral to emergency assistance/flex fund/furniture assistance",
+    ReferenceNo == 18	~ "Referral to a Housing Stability Voucher"
+     )
+}
+
+result_type <- function(ReferenceNo){
+  case_when(
+    ReferenceNo == 1 ~ "Successful referral: client accepted",
+    ReferenceNo == 2 ~ "Unsuccessful referral: client rejected",
+    ReferenceNo == 3 ~ "Unsuccessful referral: provider rejected"
+  )
+}
+
+funding_type <- function(ReferenceNo){
+  case_when(
+    ReferenceNo == 1 ~ "HUD: CoC – Homelessness Prevention (High Performing Comm. Only)",
+    ReferenceNo == 2 ~ "HUD: CoC – Permanent Supportive Housing",
+    ReferenceNo == 3 ~ "HUD: CoC – Rapid Re-Housing",
+    ReferenceNo == 4 ~ "HUD: CoC – Supportive Services Only",
+    ReferenceNo == 5 ~ "HUD: CoC – Transitional Housing",
+    ReferenceNo == 6 ~ "HUD: CoC – Safe Haven",
+    ReferenceNo == 7 ~ "HUD: CoC – Single Room Occupancy (SRO)",
+    ReferenceNo == 8 ~ "HUD: ESG – Emergency Shelter (operating and/or essential services)",
+    ReferenceNo == 9 ~ "HUD: ESG – Homelessness Prevention",
+    ReferenceNo == 10 ~ "HUD: ESG – Rapid Rehousing",
+    ReferenceNo == 11 ~ "HUD: ESG – Street Outreach",
+    ReferenceNo == 13 ~ "HUD: HOPWA – Hotel/Motel Vouchers",
+    ReferenceNo == 14 ~ "HUD: HOPWA – Housing Information",
+    ReferenceNo == 15	~ "HUD: HOPWA – Permanent Housing (facility based or TBRA)",
+    ReferenceNo == 16	~ "HUD: HOPWA – Permanent Housing Placement",
+    ReferenceNo == 17	~ "HUD: HOPWA – Short-Term Rent, Mortgage, Utility assistance",
+    ReferenceNo == 18	~ "HUD: HOPWA – Short-Term Supportive Facility",
+    ReferenceNo == 19	~ "HUD: HOPWA – Transitional Housing (facility based or TBRA)",
+    ReferenceNo == 20	~ "HUD: HUD/VASH",
+    ReferenceNo == 21	~ "HHS: PATH – Street Outreach & Supportive Services Only",
+    ReferenceNo == 22	~ "HHS: RHY – Basic Center Program (prevention and shelter)",
+    ReferenceNo == 23	~ "HHS: RHY – Maternity Group Home for Pregnant and Parenting Youth",
+    ReferenceNo == 24	~ "HHS: RHY – Transitional Living Program",
+    ReferenceNo == 25	~ "HHS: RHY – Street Outreach Project",
+    ReferenceNo == 26	~ "HHS: RHY – Demonstration Project",
+    ReferenceNo == 27	~ "VA: CRS Contract Residential Services",
+    ReferenceNo == 30	~ "VA: Community Contract Safe Haven Program",
+    ReferenceNo == 33	~ "VA: Supportive Services for Veteran Families",
+    ReferenceNo == 34	~ "N/A",
+    ReferenceNo == 35	~ "HUD: Pay for Success",
+    ReferenceNo == 36	~ "HUD: Public and Indian Housing (PIH) Programs",
+    ReferenceNo == 37	~ "VA: Grant Per Diem – Bridge Housing",
+    ReferenceNo == 38	~ "VA: Grant Per Diem – Low Demand",
+    ReferenceNo == 39	~ "VA: Grant Per Diem – Hospital to Housing",
+    ReferenceNo == 40	~ "VA: Grant Per Diem – Clinical Treatment",
+    ReferenceNo == 41	~ "VA: Grant Per Diem – Service Intensive Transitional Housing",
+    ReferenceNo == 42	~ "VA: Grant Per Diem – Transition in Place",
+    ReferenceNo == 43	~ "HUD: CoC – Youth Homeless Demonstration Program (YHDP)",
+    ReferenceNo == 44	~ "HUD: CoC – Joint Component TH/RRH",
+    ReferenceNo == 45	~ "VA: Grant Per Diem – Case Management/Housing Retention",
+    ReferenceNo == 46	~ "Local or Other Funding Source (Please Specify)",
+    ReferenceNo == 47	~ "HUD: ESG – CV",
+    ReferenceNo == 48	~ "HUD: HOPWA – CV",
+    ReferenceNo == 50	~ "HUD: HOME",
+    ReferenceNo == 51	~ "HUD: HOME (ARP)",
+    ReferenceNo == 52	~ "HUD: PIH (Emergency Housing Voucher)",
+    ReferenceNo == 53	~ "HUD: ESG – RUSH",
+    ReferenceNo == 54	~ "HUD: Unsheltered Special NOFO",
+    ReferenceNo == 55	~ "HUD: Rural Special NOFO"
+  )
+}
 
 enhanced_yes_no_translator <- function(ReferenceNo) {
   case_when(
