@@ -36,6 +36,44 @@ living_situation <- function(ReferenceNo) {
   )
 }
 
+extended_living_situation <- function(ReferenceNo) {
+  case_when(
+    ReferenceNo == 8 ~ "Other Living Situations",
+    ReferenceNo == 9 ~ "Other Living Situations",
+    ReferenceNo == 17 ~ "Other Living Situations",
+    ReferenceNo == 24 ~ "Other Living Situations",
+    ReferenceNo == 30 ~ "Other Living Situations",
+    ReferenceNo == 37 ~ "Other Living Situations",
+    ReferenceNo == 99 ~ "Other Living Situations",
+    ReferenceNo == 101 ~ "Homeless Situations",
+    ReferenceNo == 116 ~ "Homeless Situations",
+    ReferenceNo == 118 ~ "Homeless Situations",
+    ReferenceNo == 204 ~ "Institutional Situations",
+    ReferenceNo == 205 ~ "Institutional Situations",
+    ReferenceNo == 206 ~ "Institutional Situations",
+    ReferenceNo == 207 ~ "Institutional Situations",
+    ReferenceNo == 225 ~ "Institutional Situations",
+    ReferenceNo == 215 ~ "Institutional Situations",
+    ReferenceNo == 327 ~ "Temporary Housing Situations",
+    ReferenceNo == 302 ~ "Temporary Housing Situations",
+    ReferenceNo == 332 ~ "Temporary Housing Situations",
+    ReferenceNo == 329 ~ "Temporary Housing Situations",
+    ReferenceNo == 314 ~ "Temporary Housing Situations",
+    ReferenceNo == 313 ~ "Temporary Housing Situations",
+    ReferenceNo == 335 ~ "Temporary Housing Situations",
+    ReferenceNo == 336 ~ "Temporary Housing Situations",
+    ReferenceNo == 335 ~ "Temporary Housing Situations",
+    ReferenceNo == 423 ~ "Permanent Housing Situations",
+    ReferenceNo == 422 ~ "Permanent Housing Situations",
+    ReferenceNo == 435 ~ "Permanent Housing Situations",
+    ReferenceNo == 410 ~ "Permanent Housing Situations",
+    ReferenceNo == 426 ~ "Permanent Housing Situations",
+    ReferenceNo == 421 ~ "Permanent Housing Situations",
+    ReferenceNo == 411 ~ "Permanent Housing Situations"
+  )
+}
+
+
 rental_subsidy_types <- function(ReferenceNo){
   case_when(
     ReferenceNo == 419 ~ "VASH",
