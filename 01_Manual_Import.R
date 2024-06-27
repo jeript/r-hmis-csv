@@ -1,75 +1,169 @@
 library(tidyverse)
+library(lubridate)
 
-###Import relevant csv files manually and choose columns below
+Client_Data <- read_csv("Client.csv", col_types = cols_only(
+  PersonalID = col_character(),
+  DOB = col_date(),
+  AmIndAKNative = col_character(),
+  Asian = col_character(),
+  BlackAfAmerican = col_character(),
+  HispanicLatinaeo = col_character(),
+  MidEastNAfrican = col_character(),
+  NativeHIPacific = col_character(),
+  White = col_character(),
+  RaceNone = col_character(),
+  Woman = col_character(),
+  Man = col_character(),
+  NonBinary = col_character(),
+  CulturallySpecific = col_character(),
+  Transgender = col_character(),
+  Questioning = col_character(),
+  DifferentIdentity = col_character(),
+  GenderNone = col_character(),
+  VeteranStatus = col_character()
+))
 
-###Coordinated Entry Files
-Assessment_Data <- read.csv("Assessment.csv")
-Event_Data <- read.csv("Event.csv")
+Enrollment_Data <- read_csv("Enrollment.csv", col_types = cols_only(
+  EnrollmentID = col_character(),
+  PersonalID = col_character(),
+  ProjectID = col_character(),
+  EntryDate = col_date(),
+  HouseholdID = col_character(),
+  RelationshipToHoH = col_character(),
+  EnrollmentCoC = col_character(),
+  LivingSituation = col_character(),
+  RentalSubsidyType = col_character(),
+  LengthOfStay = col_character(),
+  LOSUnderThreshold = col_character(),
+  PreviousStreetESSH = col_character(),
+  DateToStreetESSH = col_date(),
+  TimesHomelessPastThreeYears = col_character(),
+  MonthsHomelessPastThreeYears = col_character(),
+  DisablingCondition = col_character(),
+  DateOfEngagement = col_date(),
+  MoveInDate = col_date()
+))
 
-###Client Data
-Client_Data <- read.csv("Client.csv")
+Exit_Data <- read_csv("Exit.csv", col_types = cols_only(
+  PersonalID = col_character(),
+  EnrollmentID = col_character(),
+  ExitDate = col_date(),
+  Destination = col_character(),
+  DestinationSubsidyType = col_character()
+))
 
-###Entry Exit Files
-Enrollment_Data <- read.csv("Enrollment.csv")
-Exit_Data <- read.csv("Exit.csv")
-Disabilities_Data <- read.csv("Disabilities.csv")
-IncomeBenefits_Data <- read.csv("IncomeBenefits.csv")
+Organization_Data <- read_csv("Organization.csv", col_types = cols_only(
+  OrganizationID = col_character(),
+  OrganizationName = col_character(),
+  VictimServiceProvider = col_character()
+))
 
-###Project Files
-Organization_Data <- read.csv("Organization.csv")
-Project_Data <- read.csv("Project.csv")
-Funder_Data <- read.csv("Funder.csv")
-CEParticipation_Data <- read.csv("CEParticipation.csv")
-HMISParticipation_Data <- read.csv("HMISParticipation.csv")
-Inventory_Data <- read.csv("Inventory.csv")
+Project_Data <- read_csv("Project.csv", col_types = cols_only(
+  ProjectID = col_character(),
+  OrganizationID = col_character(),
+  ProjectName = col_character(),
+  ProjectType = col_character(),
+  OperatingStartDate = col_date(),
+  OperatingEndDate = col_date(),
+  HousingType = col_character(),
+  RRHSubType = col_character()
+))
+
+Export_Data <- read_csv("Export.csv", col_types = cols_only(
+  ExportStartDate = col_date(),
+  ExportEndDate = col_date()
+))
+
+Disabilities_Data <- read_csv("Disabilities.csv", col_types = cols_only(
+  DisabilitiesID = col_character(),
+  EnrollmentID = col_character(),
+  PersonalID = col_character(),
+  InformationDate = col_date(),
+  DisabilityType = col_character()
+))
+
+IncomeBenefits_Data <- read_csv("IncomeBenefits.csv", col_types = cols_only(
+  EnrollmentID = col_character(),
+  PersonalID = col_character(),
+  IncomeFromAnySource = col_character(),
+  TotalMonthlyIncome = col_double(),
+  InformationDate = col_date(),
+  Earned = col_character(),
+  EarnedAmount = col_double(),
+  Unemployment = col_character(),
+  UnemploymentAmount = col_double(),
+  SSI = col_character(),
+  SSIAmount = col_double(),
+  SSDI = col_character(),
+  SSDIAmount = col_double(),
+  VADisabilityService = col_character(),
+  VADisabilityServiceAmount = col_double(),
+  VADisabilityNonService = col_character(),
+  VADisabilityNonServiceAmount = col_double(),
+  PrivateDisability = col_character(),
+  PrivateDisabilityAmount = col_double(),
+  WorkersComp = col_character(),
+  WorkersCompAmount = col_double(),
+  TANF = col_character(),
+  TANFAmount = col_double(),
+  GA = col_character(),
+  GAAmount = col_double(),
+  SocSecRetirement = col_character(),
+  SocSecRetirementAmount = col_double(),
+  Pension = col_character(),
+  PensionAmount = col_double(),
+  ChildSupport = col_character(),
+  ChildSupportAmount = col_double(),
+  Alimony = col_character(),
+  AlimonyAmount = col_double(),
+  OtherIncomeAmount = col_double()
+))
 
 
-#Export Data
-Export_Data <- read.csv("Export.csv")
+Funder_Data <- read_csv("Funder.csv", col_types = cols_only(
+  FunderID = col_character(),
+  ProjectID = col_character(),
+  Funder = col_character(),
+  StartDate = col_date(),
+  EndDate = col_date()
+))
 
+CEParticipation_Data <- read_csv("CEParticipation.csv", col_types = cols_only(
+  CEParticipationID = col_character(),
+  ProjectID = col_character(),
+  AccessPoint = col_character(),
+  PreventionAssessment = col_character(),
+  CrisisAssessment = col_character(),
+  HousingAssessment = col_character(),
+  DirectServices = col_character(),
+  ReceivesReferrals = col_character(),
+  CEParticipationStatusStartDate = col_date(),
+  CEParticipationStatusEndDate = col_date()
+))
 
-### Choose Columns
+HMISParticipation_Data <- read_csv("HMISParticipation.csv", col_types = cols_only(
+  HMISParticipationID = col_character(),
+  ProjectID = col_character(),
+  HMISParticipationType = col_character(),
+  HMISParticipationStatusStartDate = col_date(),
+  HMISParticipationStatusEndDate = col_date()
+))
 
-assessment_columns <- c("AssessmentID", "EnrollmentID", "PersonalID", "AssessmentDate", "AssessmentLocation",
-                        "AssessmentType", "AssessmentLevel", "PrioritizationStatus")
-
-event_columns <- c("EventID", "EnrollmentID", "PersonalID", "EventDate", "Event")
-
-client_columns <- c("PersonalID", "DOB", "AmIndAKNative", "Asian", "BlackAfAmerican",
-                    "HispanicLatinaeo", "MidEastNAfrican", "NativeHIPacific", "White",
-                    "RaceNone", "Woman", "Man", "NonBinary", "CulturallySpecific",
-                    "Transgender", "Questioning", "DifferentIdentity", "GenderNone", "VeteranStatus")
-
-disabilitites_columns <- c("DisabilitiesID", "EnrollmentID", "PersonalID", "InformationDate", "DisabilityType")
-
-income_columns <- c("IncomeBenefitsID", "EnrollmentID", "PersonalID", "InformationDate", "IncomeFromAnySource",
-                    "TotalMonthlyIncome")
-
-enrollment_columns <- c("EnrollmentID", "PersonalID", "ProjectID", "EntryDate",
-                        "HouseholdID", "RelationshipToHoH", "EnrollmentCoC",
-                        "LivingSituation", "RentalSubsidyType", "LengthOfStay",
-                        "LOSUnderThreshold", "PreviousStreetESSH", "DateToStreetESSH",
-                        "TimesHomelessPastThreeYears", "MonthsHomelessPastThreeYears",
-                        "DisablingCondition", "DateOfEngagement", "MoveInDate")
-
-exit_columns <- c("PersonalID", "EnrollmentID", "ExitDate", "Destination", "DestinationSubsidyType")
-
-organization_columns <- c("OrganizationID", "OrganizationName", "VictimServiceProvider")
-
-project_columns <- c("ProjectID", "OrganizationID", "ProjectName", "ProjectType")
-
-ceparticipation_data <- c("CEParticipationID", "ProjectID", "AccessPoint", "PreventionAssessment", "CrisisAssessment",
-                          "HousingAssessment", "DirectServices", "ReceivesReferrals", "CEParticipationStatusStartDate",
-                          "CEParticipationStatusEndDate")
-
-funder_columns <- c("FunderID", "ProjectID", "Funder", "StartDate", "EndDate")
-
-hmisparticipation_columns <- c("HMISParticipationID", "ProjectID", "HMISParticipationType", "HMISParticipationStatusStartDate",
-                               "HMISParticipationStatusEndDate")
-
-inventory_columns <- c("InventoryID", "ProjectID", "CoCCode", "HouseholdType", "Availability", "BedInventory", "CHVetBedInventory",
-                       "YouthVetBedInventory", "VetBedInventory", "CHYouthBedInventory", "YouthBedInventory", "CHBedInventory",
-                       "OtherBedInventory", "ESBedType", "InventoryStartDate", "InventoryEndDate")
-
-
-export_columns <- c("ExportStartDate", "ExportEndDate")
+Inventory_Data <- read_csv("Inventory.csv", col_types = cols_only(
+  InventoryID = col_character(),
+  ProjectID = col_character(),
+  CoCCode = col_character(),
+  HouseholdType = col_character(),
+  Availability = col_character(),
+  BedInventory = col_double(),
+  CHVetBedInventory = col_double(),
+  YouthVetBedInventory = col_double(),
+  VetBedInventory = col_double(),
+  CHYouthBedInventory = col_double(),
+  YouthBedInventory = col_double(),
+  CHBedInventory = col_double(),
+  OtherBedInventory = col_double(),
+  ESBedType = col_character(),
+  InventoryStartDate = col_date(),
+  InventoryEndDate = col_date()
+))
