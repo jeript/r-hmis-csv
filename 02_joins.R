@@ -1,4 +1,5 @@
 library(dplyr)
+library(lubridate)
 
 ############################################################
 ### This will join Client, Entry, Exit, and Project data ###
@@ -10,7 +11,9 @@ Client_Entry_Data <- Client_Data %>%
 
 ### Join Client, Enrollment, and Exit Data
 Client_Entry_Data <- Client_Entry_Data %>%
-  left_join(Exit_Data, by = c("PersonalID", "EnrollmentID"))
+  left_join(Exit_Data, by = c("PersonalID", "EnrollmentID")) %>%
+  mutate(ExitAdjust = coalesce(ExitDate, no_end_date),
+         EnrollmentDateRange = interval(EntryDate, ExitAdjust))
 
 ### Join Client, Enrollment, Exit, and Organization Data
 Project_Join <- Organization_Data %>%
