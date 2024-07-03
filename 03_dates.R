@@ -24,12 +24,6 @@ Client_Entry_Data <- Client_Entry_Data %>%
   mutate(MostRecentEntry = max(EntryDate, na.rm = TRUE)) %>%
   ungroup()
 
-###Find age based on HMIS reporting logic
-Client_Entry_Data <- Client_Entry_Data %>%
-  mutate(ClientAge = ifelse(is.na(DOB), 
-                            NA,
-                            ifelse(EntryDate < Export_Data$ExportStartDate,
-                                   as.numeric(floor(as.period(interval(DOB, Export_Data$ExportStartDate)) / years(1))),
-                                   as.numeric(floor(as.period(interval(DOB, MostRecentEntry)) / years(1))))))
+
 
 
