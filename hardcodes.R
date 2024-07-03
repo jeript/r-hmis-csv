@@ -108,4 +108,30 @@ dkr <- c(8, 9)
 
 subsidy_types <- c(419, 420, 428, 431, 433, 434, 436, 437, 438, 439, 440)
 
+# Chronic Groupings -------------------------------------------------------
+
+###Length of stay less than 7 days for temporary situations
+ch_temp_7_los <- c(10, 11)
+
+###Length of stay less than 90 days for institutional sitations
+ch_temp_90_los <- c(2, 3, 10, 11)
+
+###Months spent homeless
+ch_months <- c(112, 113)
+
+###Number of times homeless
+ch_times <- 4
+
+###Homeless living situations
+ch_living <- c(116, 101, 118)
+
+###Institutional situations
+ch_ins_living <- c(215, 206, 207, 225, 204, 205)
+
+###Temporary situations
+ch_temp_living <- c(8, 9, 99, 302, 329, 314, 332, 312, 313, 327, 336, 335)
+
+###Homeless night before temporary or institutional situation
+ch_prior_ins_temp <- 1
+
 
