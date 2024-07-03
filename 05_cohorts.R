@@ -38,9 +38,6 @@ determine_HHType <- function(df) {
 }
 
 
-###Add Household Type to Joined File
-Client_Entry_Data <- determine_HHType(Client_Entry_Data)
-
 ###Household Type Count Data Frame
 HouseholdDF <- Client_Entry_Data %>%
   group_by(HHType) %>%
@@ -68,8 +65,7 @@ determine_APR_HHType <- function(df) {
     ungroup()
 }
 
-###Add APR household type to data frame
-Client_Entry_Data <- determine_APR_HHType(Client_Entry_Data)
+
 
 ###APR Household Type Count Data Frame
 HouseholdDF_APR <- Client_Entry_Data %>%
