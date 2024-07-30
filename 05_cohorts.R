@@ -1,11 +1,7 @@
 library(lubridate)
 library(dplyr)
 
-
-
-###This will classify a person's type and is dependent on age only and includes
-###youth
-Client_Entry_Data$APRPersonType <- with(Client_Entry_Data, ifelse(is.na(ClientAge), 
+Client_Entry_Data$PersonType <- with(Client_Entry_Data, ifelse(is.na(ClientAge), 
                                 "Unknown",
                                 ifelse(ClientAge < 12, 
                                 "Child Under 12",
@@ -15,20 +11,45 @@ Client_Entry_Data$APRPersonType <- with(Client_Entry_Data, ifelse(is.na(ClientAg
                                 "Adult-age Youth 18-24",       
                                 "Adult 18 and over")))))
 
-Person_counts_APR <- Client_Entry_Data %>%
-  group_by(APRPersonType) %>%
-  summarise(DistinctPersonalIDCount = n_distinct(PersonalID))
-
-Client_Entry_Data$PersonType <- with(Client_Entry_Data, ifelse(is.na(ClientAge), 
-                                                               "Unknown",
-                                                               ifelse(ClientAge < 17, 
-                                                                      "Child",
-                                                                      ifelse(ClientAge >= 18 & ClientAge <= 24, 
-                                                                             "Youth", 
-                                                                             "Adult"))))
 
 Person_counts <- Client_Entry_Data %>%
   group_by(PersonType) %>%
+  summarise(DistinctPersonalIDCount = n_distinct(PersonalID))
+
+
+determine_HHType <- function(df) {
+  df %>% 
+    group_by(HouseholdID) %>%
+    mutate(HHType = case_when(
+      all(PersonType == "Adult 18 and over") ~ "Adult",
+      any(PersonType == "Adult 18 and over") & any(PersonType == "Adult-age Youth 18-24") ~ "Adult",
+      any(PersonType == "Adult 18 and over") & (any(PersonType == "Child Under 12") | any(PersonType == "Youth 12-17")) ~ "Adult Child",
+      (any(PersonType == "Youth 12-17") | any(PersonType == "Adult-age Youth 18-24")) & any(RelationshipToHoH == 1) & any(PersonType == "Child Under 12") ~ "Parenting Youth",
+      all(PersonType %in% c("Youth 12-17", "Adult-age Youth 18-24")) ~ "Youth",
+      all(PersonType == "Child Under 12") ~ "Child",
+      TRUE ~ NA_character_
+    )) %>%
+    ungroup()
+}
+
+Client_Entry_Data <- determine_HHType(Client_Entry_Data)
+
+HouseholdDF <- Client_Entry_Data %>%
+  group_by(HHType) %>%
+  summarise(DistinctPersonalIDCount = n_distinct(PersonalID))
+
+
+
+Client_Entry_Data$PersonTypeAPR <- with(Client_Entry_Data, ifelse(is.na(ClientAge), 
+                                   "Unknown",
+                                    ifelse(ClientAge < 18, 
+                                    "Child",
+                                    "Adult")))
+
+
+
+Person_counts_APR <- Client_Entry_Data %>%
+  group_by(PersonTypeAPR) %>%
   summarise(DistinctPersonalIDCount = n_distinct(PersonalID))
 
 
@@ -38,15 +59,15 @@ determine_APR_HHType <- function(df) {
     group_by(HouseholdID) %>%
     mutate(
       APR_HHType = case_when(
-        all(PersonType == "Adult") ~ "Adult",
-        any(PersonType == "Adult") & any(PersonType == "Youth") & 
-          !any(PersonType == "Child") & any(RelationshipToHoH == 1) ~ "Adult",
-        any(PersonType == "Adult") & any(RelationshipToHoH == 1) & 
-          any(PersonType == "Child") ~ "Adult Child",
-        any(PersonType == "Youth") & any(RelationshipToHoH == 1) & 
-          any(PersonType == "Child") & !any(PersonType == "Adult") ~ "Adult Child",
-        all(PersonType == "Youth") ~ "Adult",
-        all(PersonType == "Child") ~ "Child Only",
+        all(PersonTypeAPR == "Adult") ~ "Adult",
+        any(PersonTypeAPR == "Adult") & any(PersonTypeAPR == "Youth") & 
+          !any(PersonTypeAPR == "Child") & any(RelationshipToHoH == 1) ~ "Adult",
+        any(PersonTypeAPR == "Adult") & any(RelationshipToHoH == 1) & 
+          any(PersonTypeAPR == "Child") ~ "Adult Child",
+        any(PersonTypeAPR == "Youth") & any(RelationshipToHoH == 1) & 
+          any(PersonTypeAPR == "Child") & !any(PersonTypeAPR == "Adult") ~ "Adult Child",
+        all(PersonTypeAPR == "Youth") ~ "Adult",
+        all(PersonTypeAPR == "Child") ~ "Child Only",
         TRUE ~ "Unknown"
       )
     ) %>%
@@ -56,8 +77,9 @@ determine_APR_HHType <- function(df) {
 
 Client_Entry_Data <- determine_APR_HHType(Client_Entry_Data)
 
+
+
 ###APR Household Type Count Data Frame
 HouseholdDF_APR <- Client_Entry_Data %>%
   group_by(APR_HHType) %>%
   summarise(DistinctPersonalIDCount = n_distinct(PersonalID))
-
