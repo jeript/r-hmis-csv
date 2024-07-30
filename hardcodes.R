@@ -1,3 +1,5 @@
+library(dplyr)
+
 ###Hard codes from Eva
 
 hc_prior_living_situation_required <- ymd("20161001")
