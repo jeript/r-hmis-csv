@@ -11,8 +11,9 @@ Client_Entry_Data <- Client_Entry_Data %>%
                                    as.numeric(floor(as.period(interval(DOB, Export_Data$ExportStartDate)) / years(1))),
                                    as.numeric(floor(as.period(interval(DOB, MostRecentEntry)) / years(1))))))
 
-# Find AgeGroup
-Client_Entry_Data <- Client_Entry_Data %>%
+
+
+age_groups <- Client_Entry_Data %>%
   group_by(PersonalID) %>%
   summarise(ClientAge = first(ClientAge)) %>%
   mutate(AgeGroup = case_when(
@@ -29,9 +30,16 @@ Client_Entry_Data <- Client_Entry_Data %>%
     TRUE ~ NA_character_
   ))
 
-Client_Entry_Data$AgeGroup <- factor(Client_Entry_Data$AgeGroup, levels = c("Under 5", "5 to 12", "13 to 17", "18 to 24", "25 to 34", "35 to 44", "45 to 54", "55 to 64", "65 and over"))
+age_groups$AgeGroup <- factor(age_groups$AgeGroup,
+                      levels = c("Under 5", "5 to 12", "13 to 17", "18 to 24",
+                                 "25 to 34", "35 to 44", "45 to 54", "55 to 64", "65 and over"))
 
-# Age Group data frame
+
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  left_join(age_groups %>% select(PersonalID, AgeGroup), by = "PersonalID")
+
+
 age_group_counts <- Client_Entry_Data %>%
   group_by(AgeGroup) %>%
   summarise(DistinctPersonalIDCount = n_distinct(PersonalID))
