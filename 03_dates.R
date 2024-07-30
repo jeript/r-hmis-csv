@@ -1,5 +1,5 @@
 library(lubridate)
-library(tidyverse)
+library(dplyr)
 
 ###Date Functions
 
@@ -23,7 +23,3 @@ Client_Entry_Data <- Client_Entry_Data %>%
   group_by(PersonalID) %>%
   mutate(MostRecentEntry = max(EntryDate, na.rm = TRUE)) %>%
   ungroup()
-
-
-
-
