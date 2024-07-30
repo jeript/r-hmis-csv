@@ -69,6 +69,11 @@ Project_Data <- read_csv("Project.csv", col_types = cols_only(
   RRHSubType = col_character()
 ))
 
+ProjectCoC_Data <- read_csv("ProjectCoC.csv", col_types = cols_only(
+  ProjectID = col_character(),
+  CoCCode = col_character()
+))
+
 Export_Data <- read_csv("Export.csv", col_types = cols_only(
   ExportStartDate = col_date(),
   ExportEndDate = col_date()
@@ -166,4 +171,28 @@ Inventory_Data <- read_csv("Inventory.csv", col_types = cols_only(
   ESBedType = col_character(),
   InventoryStartDate = col_date(),
   InventoryEndDate = col_date()
+))
+
+Assessment_Data <- read_csv("Assessment.csv", col_types = cols_only(
+  AssessmentID = col_character(),
+  EnrollmentID = col_character(),
+  PersonalID = col_character(),
+  AssessmentDate = col_date(),
+  AssessmentLocation = col_character(),
+  AssessmentType = col_character(),
+  AssessmentLevel = col_character(),
+  PrioritizationStatus = col_character()
+))
+
+Event_Data <- read_csv("Event.csv", col_types = cols_only(
+  EventID = col_character(),
+  EnrollmentID = col_character(),
+  PersonalID = col_character(),
+  EventDate = col_date(),
+  Event = col_character(),
+  ProbSolDivRRResult = col_character(),
+  ReferralCaseManageAfter = col_character(),
+  LocationCrisisOrPHHousing = col_character(),
+  ReferralResult = col_character(),
+  ResultDate = col_date()
 ))
