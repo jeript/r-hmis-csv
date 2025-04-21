@@ -16,21 +16,24 @@ Person_counts <- Client_Entry_Data %>%
   group_by(PersonType) %>%
   summarise(DistinctPersonalIDCount = n_distinct(PersonalID))
 
-
 determine_HHType <- function(df) {
   df %>% 
     group_by(HouseholdID) %>%
     mutate(HHType = case_when(
       all(PersonType == "Adult 18 and over") ~ "Adult",
-      any(PersonType == "Adult 18 and over") & any(PersonType == "Adult-age Youth 18-24") ~ "Adult",
-      any(PersonType == "Adult 18 and over") & (any(PersonType == "Child Under 12") | any(PersonType == "Youth 12-17")) ~ "Adult Child",
-      (any(PersonType == "Youth 12-17") | any(PersonType == "Adult-age Youth 18-24")) & any(RelationshipToHoH == 1) & any(PersonType == "Child Under 12") ~ "Parenting Youth",
+      any(PersonType == "Adult 18 and over") & 
+        any(PersonType == "Adult-age Youth 18-24") ~ "Adult",
+      any(PersonType == "Adult 18 and over") & 
+        (any(PersonType == "Child Under 12") | any(PersonType == "Youth 12-17")) ~ "Adult Child",
+      (any(PersonType == "Youth 12-17") | any(PersonType == "Adult-age Youth 18-24")) &
+        any(RelationshipToHoH == 1) & any(PersonType == "Child Under 12") ~ "Parenting Youth",
       all(PersonType %in% c("Youth 12-17", "Adult-age Youth 18-24")) ~ "Youth",
       all(PersonType == "Child Under 12") ~ "Child",
       TRUE ~ NA_character_
     )) %>%
     ungroup()
 }
+
 
 Client_Entry_Data <- determine_HHType(Client_Entry_Data)
 
@@ -78,8 +81,29 @@ determine_APR_HHType <- function(df) {
 Client_Entry_Data <- determine_APR_HHType(Client_Entry_Data)
 
 
+###Propogate CoC Data to HH
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(HouseholdID) %>%
+  mutate(EnrollmentCoC = EnrollmentCoC[RelationshipToHoH == 1][1],
+         ) %>%
+  ungroup()
 
-###APR Household Type Count Data Frame
-HouseholdDF_APR <- Client_Entry_Data %>%
-  group_by(APR_HHType) %>%
-  summarise(DistinctPersonalIDCount = n_distinct(PersonalID))
+###Propogate Living Situation to HH
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(HouseholdID) %>%
+  mutate(
+    HoH_LivingSituation = LivingSituation[RelationshipToHoH == 1][1],
+    HoH_LivingSituationDescription = LivingSituationDescription[RelationshipToHoH == 1][1],
+    HoH_ExtLivingSituationDescription = ExtLivingSituationDescription[RelationshipToHoH == 1][1],
+    
+    LivingSituation = ifelse(ClientAge < 18 | (ClientAge >= 18 & is.na(LivingSituation)), HoH_LivingSituation, LivingSituation),
+    LivingSituationDescription = ifelse(ClientAge < 18 | (ClientAge >= 18 & is.na(LivingSituationDescription)), HoH_LivingSituationDescription, LivingSituationDescription),
+    ExtLivingSituationDescription = ifelse(ClientAge < 18 | (ClientAge >= 18 & is.na(ExtLivingSituationDescription)), HoH_ExtLivingSituationDescription, ExtLivingSituationDescription)
+  ) %>%
+  select(-HoH_LivingSituation, -HoH_LivingSituationDescription, -HoH_ExtLivingSituationDescription) %>%
+  ungroup()
+
+###Filter out non CoC codes
+Client_Entry_Data <- Client_Entry_Data %>%
+  filter(EnrollmentCoC == "AL-500")
+
