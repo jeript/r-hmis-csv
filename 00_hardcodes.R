@@ -1,10 +1,7 @@
+library(lubridate)
 library(dplyr)
 
 ###Hard codes from Eva
-
-hc_prior_living_situation_required <- ymd("20161001")
-hc_psh_started_collecting_move_in_date <- ymd("20171001")
-no_end_date <- ymd("20990909")
 
 # Living Situations Groups (includes PLS, CLS, and destinations) 
 #(Updated to match FY2024 DS) ---------------------------------------------
@@ -23,9 +20,7 @@ allowed_destinations <-
     327, 422, 423, 426, 410, 435, 421, 411, 30, 17, 24, 8, 9, 99)
 
 allowed_living_situations <- 
-  c(allowed_prior_living_sit,
-    allowed_current_living_sit,
-    allowed_destinations) %>%
+  c(allowed_prior_living_sit, allowed_current_living_sit, allowed_destinations) %>%
   unique() %>%
   sort()
 
@@ -43,6 +38,33 @@ other_livingsituation <- c(8, 9, 17, 24, 30, 37, 99)
 
 not_homeless_livingsituation <- 
   c(204, 205, 206, 207, 215, 225, 302, 314, 329, 332, 335, 336, 410, 411, 421, 435)
+
+# Chronic Groupings -------------------------------------------------------
+
+###Length of stay less than 7 days for temporary situations
+ch_temp_7_los <- c(10, 11)
+
+###Length of stay less than 90 days for institutional situations
+ch_temp_90_los <- c(2, 3, 10, 11)
+
+###Months spent homeless
+ch_months <- c(112, 113)
+
+###Number of times homeless
+ch_times <- 4
+
+###Homeless living situations
+ch_living <- c(116, 101, 118)
+
+###Institutional situations
+ch_ins_living <- c(215, 206, 207, 225, 204, 205)
+
+###Temporary situations
+ch_temp_living <- c(8, 9, 99, 302, 329, 314, 332, 312, 313, 327, 336, 335)
+
+###Homeless night before temporary or institutional situation
+ch_prior_ins_temp <- 1
+
 
 
 # Project Type Groupings --------------------------------------------------
@@ -85,6 +107,8 @@ coc_funded_project_types <- c(2, 3, 13)
 
 project_types_w_beds <- c(0, 1, 2, 3, 8, 9, 10, 13)
 
+project_types_wo_beds <- c(4, 6, 7, 12, 14)
+
 project_types_w_cls <- c(1, 4, 6, 14)
 
 long_stayer_98_percentile_project_types <- c(0, 2, 8, 12, 13)
@@ -109,31 +133,5 @@ dkr <- c(8, 9)
 # Allowed Subsidy Types ---------------------------------------------------
 
 subsidy_types <- c(419, 420, 428, 431, 433, 434, 436, 437, 438, 439, 440)
-
-# Chronic Groupings -------------------------------------------------------
-
-###Length of stay less than 7 days for temporary situations
-ch_temp_7_los <- c(10, 11)
-
-###Length of stay less than 90 days for institutional sitations
-ch_temp_90_los <- c(2, 3, 10, 11)
-
-###Months spent homeless
-ch_months <- c(112, 113)
-
-###Number of times homeless
-ch_times <- 4
-
-###Homeless living situations
-ch_living <- c(116, 101, 118)
-
-###Institutional situations
-ch_ins_living <- c(215, 206, 207, 225, 204, 205)
-
-###Temporary situations
-ch_temp_living <- c(8, 9, 99, 302, 329, 314, 332, 312, 313, 327, 336, 335)
-
-###Homeless night before temporary or institutional situation
-ch_prior_ins_temp <- 1
 
 
