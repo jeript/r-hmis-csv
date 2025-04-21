@@ -1,0 +1,91 @@
+library(dplyr)
+library(lubridate)
+
+
+
+###Set up lookback period
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(Lookback = ifelse(ProjectType %in% c(0, 1, 2, 3, 4, 8, 9, 10, 13) &
+                                 ExitDate >= (ReportStart - 730) &
+                                 ExitDate <= (ReportEnd - 730), "Yes", "No"))
+
+
+
+###Find the oldest exit perm date
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(EnrollmentID) %>%
+  mutate(ExitPerm = as.Date(ifelse(Lookback == "Yes" & ExtDestinationDescription == "Permanent Housing Situations",
+                                     min(ExitDate, na.rm = TRUE), NA))) %>%
+  ungroup() %>%
+  group_by(PersonalID) %>%
+  mutate(OldestExitPerm = min(ExitPerm, na.rm = TRUE)) %>%
+  ungroup()
+
+
+
+###New
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(EnrollmentID) %>%
+  mutate(ReturnNew = case_when(
+    # Condition 1: Immediate Return - Street Outreach, Emergency Shelter, Transitional Housing, or Safe Haven
+    (ProjectType %in% c(0, 1, 2, 4, 8) & 
+       !is.na(OldestExitPerm) & EntryDate > OldestExitPerm & 
+       EntryDate <= (OldestExitPerm + 730)) ~ "Yes",
+    
+    # Condition 2: PH Project Return - Requires at least 14 days after OldestExitPerm, within 2 years
+    (ProjectType %in% c(3, 9, 10, 13) & 
+       !is.na(OldestExitPerm) & EntryDate > (OldestExitPerm + 14) & 
+       EntryDate <= (OldestExitPerm + 730)) ~ "Yes",
+    
+    # Default case: No return
+    TRUE ~ "No"
+  )) %>%
+  ungroup()
+
+###Grouped by enrollment
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(EnrollmentID) %>%
+  mutate(
+    ReturnDate = as.Date(ifelse(
+      EntryDate == min(EntryDate[
+        # Condition 1: Immediate return (ProjectTypes 0, 1, 2, 4, 8)
+        (ProjectType %in% c(0, 1, 2, 4, 8) & 
+           !is.na(OldestExitPerm) & EntryDate > OldestExitPerm & 
+           EntryDate <= (OldestExitPerm + 730)) |
+          
+          # Condition 2: PH return after 14 days (ProjectTypes 3, 9, 10, 13)
+          (ProjectType %in% c(3, 9, 10, 13) & 
+             !is.na(OldestExitPerm) & EntryDate > (OldestExitPerm + 14) & 
+             EntryDate <= (OldestExitPerm + 730))
+      ], na.rm = TRUE), EntryDate, NA))
+  ) %>%
+  ungroup()
+
+###Grouped by client
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(PersonalID) %>%
+  mutate(
+    ReturnDate = as.Date(ifelse(
+      EntryDate == min(EntryDate[
+        # Condition 1: Immediate return (ProjectTypes 0, 1, 2, 4, 8)
+        (ProjectType %in% c(0, 1, 2, 4, 8) & 
+           !is.na(OldestExitPerm) & EntryDate > OldestExitPerm & 
+           EntryDate <= (OldestExitPerm + 730)) |
+          
+          # Condition 2: PH return after 14 days (ProjectTypes 3, 9, 10, 13)
+          (ProjectType %in% c(3, 9, 10, 13) & 
+             !is.na(OldestExitPerm) & EntryDate > (OldestExitPerm + 14) & 
+             EntryDate <= (OldestExitPerm + 730))
+      ], na.rm = TRUE), EntryDate, NA))
+  ) %>%
+  ungroup()
+
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(
+    Return25 = ifelse(
+      Lookback == "Yes" & !is.na(ReturnDate),
+      "Yes",
+      "No"
+    )
+  )
