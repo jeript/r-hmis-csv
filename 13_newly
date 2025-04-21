@@ -1,0 +1,78 @@
+library(lubridate)
+library(dplyr)
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(PersonalID) %>%  # Group by PersonalID to check across all their entries
+  mutate(NewExclude = ifelse(any(
+    ProjectType %in% c(3, 9, 10, 13) &  # Entry in ProjectType 3, 9, 10, 13
+      ValidHMID == "Yes" &  # Valid HMID is "Yes"
+      (is.na(ExitDate) | (ExitDate >= ReportStart & ExitDate <= ReportEnd))  # ExitDate is NA or within the reporting period
+  ), "Yes", "No")) %>%
+  ungroup()
+
+###Find the first entry into project types with beds in 2025 WORKS
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(PersonalID) %>%
+  mutate(FirstBedEntry = case_when(
+    ProjectType %in% c(0, 1, 2, 8) | 
+      (ProjectType %in% c(3, 9, 10, 13) & HomelessAtStart == "Yes") ~ 
+      if (any(EntryDate >= ReportStart & EntryDate <= ReportEnd, na.rm = TRUE)) {
+        min(EntryDate[EntryDate >= ReportStart & EntryDate <= ReportEnd], na.rm = TRUE)
+      } else {
+        as.Date(NA_character_)  # Explicitly setting NA as Date
+      },
+    TRUE ~ as.Date(NA_character_)  # Ensures missing values remain Date type
+  )) %>%
+  ungroup()
+
+
+###Create the lookback date WORKS
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(
+    FirstBedEntry = as.Date(FirstBedEntry),  # Only convert if needed
+    NewLookback = if_else(
+      !is.na(FirstBedEntry), 
+      FirstBedEntry - years(2),  # Subtract 2 years more intuitively
+      as.Date(NA_character_)  # Ensures NewLookback stays as Date type if NA
+    )
+  )
+
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(PersonalID) %>%
+  mutate(LookbackEntry = case_when(
+    !is.na(EntryDate) & !is.na(NewLookback) & !is.na(FirstBedEntry) & !is.na(NewExclude) &
+      ProjectType %in% c(0, 1, 2, 8, 3, 9, 10, 13) &
+      EntryDate >= NewLookback & EntryDate <= FirstBedEntry &
+      (is.na(ExitDate) | (ExitDate >= NewLookback & ExitDate < FirstBedEntry)) &  # New ExitDate condition
+      NewExclude != "Yes" ~ "Yes",
+    TRUE ~ "No"  # Ensures no unintended NA values
+  )) %>%
+  ungroup()
+
+###Format dates
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(EntryDate = as.Date(EntryDate, format = "%Y-%m-%d"),
+         ExitDate = as.Date(ExitDate, format = "%Y-%m-%d"),
+         FirstBedEntry = as.Date(FirstBedEntry25, format = "%Y-%m-%d"),
+         NewLookback = as.Date(NewLookback25, format = "%Y-%m-%d"))
+
+###Find newly homeless
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(PersonalID) %>%
+  mutate(NewlyHomeless = case_when(
+    is.na(FirstBedEntry) & is.na(NewLookback25) ~ NA_character_,  # Skip calculation
+    NewExclude == "Yes" ~ NA_character_,  # Skip calculation
+    LookbackEntry == "No" ~ NA_character_,  # Skip calculation
+    any(
+      ProjectType %in% c(0, 1, 2, 8) & 
+        !is.na(EntryDate) & EntryDate < FirstBedEntry & EntryDate >= NewLookback & 
+        (is.na(ExitDate) | ExitDate >= FirstBedEntry), 
+      na.rm = TRUE  # Ensures proper handling of NA values
+    ) ~ "No",
+    TRUE ~ "Yes"
+  )) %>%
+  ungroup()
