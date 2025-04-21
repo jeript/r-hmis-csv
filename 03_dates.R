@@ -3,20 +3,12 @@ library(dplyr)
 
 ###Date Functions
 
-###Calculate Days Homeless between Approximate Date and Entry Date
+###Add export start and end
 Client_Entry_Data <- Client_Entry_Data %>%
-  mutate(DaysHomelessBeforeEntry = ifelse(is.na(DateToStreetESSH), 
-                                          as.numeric(EntryDate), 
-                                          as.numeric(difftime(EntryDate, DateToStreetESSH, units = "days"))))
+  mutate(ReportStartDate = Export_Data$ExportStartDate)
 
-
-###Calculate Days Spent Homeless in Project
 Client_Entry_Data <- Client_Entry_Data %>%
-  mutate(DaysHomelessInProject = difftime(ymd(ExitAdjust),
-                                          ymd(EntryDate),
-                                          units = "days"))
-
-
+  mutate(ReportEndDate = Export_Data$ExportEndDate)
 
 ###Find the Most Recent Entry Date
 Client_Entry_Data <- Client_Entry_Data %>%
