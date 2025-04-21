@@ -62,6 +62,7 @@ Project_Data <- read_csv("Project.csv", col_types = cols_only(
   ProjectID = col_character(),
   OrganizationID = col_character(),
   ProjectName = col_character(),
+  ProjectCommonName = col_character(),
   ProjectType = col_character(),
   OperatingStartDate = col_date(),
   OperatingEndDate = col_date(),
@@ -84,10 +85,13 @@ Disabilities_Data <- read_csv("Disabilities.csv", col_types = cols_only(
   EnrollmentID = col_character(),
   PersonalID = col_character(),
   InformationDate = col_date(),
-  DisabilityType = col_character()
+  DisabilityType = col_character(),
+  DisabilityResponse = col_character(),
+  DataCollectionStage = col_character()
 ))
 
 IncomeBenefits_Data <- read_csv("IncomeBenefits.csv", col_types = cols_only(
+  IncomeBenefitsID = col_character(),
   EnrollmentID = col_character(),
   PersonalID = col_character(),
   IncomeFromAnySource = col_character(),
@@ -121,7 +125,9 @@ IncomeBenefits_Data <- read_csv("IncomeBenefits.csv", col_types = cols_only(
   ChildSupportAmount = col_double(),
   Alimony = col_character(),
   AlimonyAmount = col_double(),
-  OtherIncomeAmount = col_double()
+  OtherIncomeSource = col_character(),
+  OtherIncomeAmount = col_double(),
+  DataCollectionStage = col_character()
 ))
 
 
@@ -187,12 +193,19 @@ Assessment_Data <- read_csv("Assessment.csv", col_types = cols_only(
 Event_Data <- read_csv("Event.csv", col_types = cols_only(
   EventID = col_character(),
   EnrollmentID = col_character(),
-  PersonalID = col_character(),
+  
   EventDate = col_date(),
   Event = col_character(),
-  ProbSolDivRRResult = col_character(),
-  ReferralCaseManageAfter = col_character(),
+ 
   LocationCrisisOrPHHousing = col_character(),
   ReferralResult = col_character(),
   ResultDate = col_date()
 ))
+
+HealthDV_Data <- read_csv("HealthAndDV.csv", col_types = cols_only(
+  EnrollmentID = col_character(),
+  PersonalID = col_character(),
+  DomesticViolenceSurvivor = col_character(),
+  InformationDate = col_date(),
+  DataCollectionStage = col_character()
+  ))
