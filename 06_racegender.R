@@ -37,6 +37,16 @@ Client_Entry_Data$MergedGender <- apply(Client_Entry_Data[gender_columns], 1, fu
 ###Add Merged Gender to the Joined file
 Client_Entry_Data$MergedGender[Client_Entry_Data$MergedGender == ""] <- NA
 
+###Remove Columns
+Client_Entry_Data <- Client_Entry_Data %>%
+  select(-c(
+    "AmIndAKNative", "Asian", "BlackAfAmerican", "HispanicLatinaeo", "MidEastNAfrican", 
+    "NativeHIPacific", "White", "RaceNone", "Woman", "Man", "NonBinary", "CulturallySpecific", 
+    "Transgender", "Questioning", "DifferentIdentity", "GenderNone"
+  ))
+
+
+
 gender_counts <- Client_Entry_Data %>%
   group_by(MergedGender) %>%
   summarise(Distinct_PersonalID_Count = n_distinct(PersonalID))
