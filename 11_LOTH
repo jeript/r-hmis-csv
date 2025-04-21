@@ -1,0 +1,337 @@
+library(lubridate)
+library(dplyr)
+
+###Step 1: Find Literally Homeless at Project Entry WORKS
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(HomelessAtStart = case_when(
+    # First condition: ProjectType = 0, 1, 4, or 8
+    ProjectType %in% c(0, 1, 4, 8) ~ "Yes",
+    
+    # Second condition: ProjectType = 2, 3, 9, 10, or 13 AND other conditions
+    ProjectType %in% c(2, 3, 9, 10, 11, 13, 14) & (
+      # LivingSituation between 100 and 199
+      (LivingSituation >= 100 & LivingSituation <= 199) |
+        
+        # LivingSituation between 200 and 299 AND LengthOfStay = 2, 3, 10, 11 AND PreviousStreetESSH = 1
+        (LivingSituation >= 200 & LivingSituation <= 299 & LengthOfStay %in% c(2, 3, 10, 11) & PreviousStreetESSH == 1) |
+        
+        # LivingSituation between 0 and 99 or 300 and 499 AND LengthOfStay = 10, 11 AND PreviousStreetESSH = 1
+        ((LivingSituation >= 0 & LivingSituation <= 99 | LivingSituation >= 300 & LivingSituation <= 499) & LengthOfStay %in% c(10, 11) & PreviousStreetESSH == 1)
+    ) ~ "Yes",
+    
+    # If none of the above conditions match, "No"
+    TRUE ~ "No"
+  ))
+
+###Step 2: Propogate HomelessAtStart to minors WORKS
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(HouseholdID) %>%
+  mutate(HomelessAtStart = ifelse(any(ClientAge >= 18 & HomelessAtStart == "Yes"), "Yes", HomelessAtStart)) %>%
+  ungroup()
+
+
+
+###Step 3: Find the universe of entries WORKS
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(LOTHUniverse = ifelse(
+    (ProjectType %in% c(0, 1, 2, 8)) | 
+      (HomelessAtStart == "Yes" & 
+         ((ProjectType %in% c(3, 9, 10, 13) & EntryDate <= ReportEndDate) &
+            ((ExitDate >= ReportStartDate) | is.na(ExitDate)))),
+    "Yes", "No"
+  ))
+
+###Step 4: Find the most recent ES entry Date
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(PersonalID) %>%
+  mutate(
+    MostRecentES = if (any(ProjectType %in% c(0, 1, 8) & LOTHUniverse == "Yes")) {
+      idx <- which.max(if_else(ProjectType %in% c(0, 1, 8) & LOTHUniverse == "Yes", EntryDate, as.Date(NA)))
+      EntryDate[idx]
+    } else {
+      as.Date(NA)
+    },
+    
+    MostRecentESEnrollmentID = if (any(ProjectType %in% c(0, 1, 8) & LOTHUniverse == "Yes")) {
+      idx <- which.max(if_else(ProjectType %in% c(0, 1, 8) & LOTHUniverse == "Yes", EntryDate, as.Date(NA)))
+      EnrollmentID[idx]
+    } else {
+      NA_character_
+    },
+    
+    MostRecentES_DateToStreetESSH = if (any(ProjectType %in% c(0, 1, 8) & LOTHUniverse == "Yes")) {
+      idx <- which.max(if_else(ProjectType %in% c(0, 1, 8) & LOTHUniverse == "Yes", EntryDate, as.Date(NA)))
+      DateToStreetESSH[idx]
+    } else {
+      as.Date(NA)
+    }
+  ) %>%
+  ungroup()
+
+###Step 5: Find the most recent TH entry date
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(PersonalID) %>%
+  mutate(
+    MostRecentTH = if (any(ProjectType == 2 & LOTHUniverse == "Yes")) {
+      idx <- which.max(if_else(ProjectType == 2 & LOTHUniverse == "Yes", EntryDate, as.Date(NA)))
+      EntryDate[idx]
+    } else {
+      as.Date(NA)
+    },
+    
+    MostRecentTHEnrollmentID = if (any(ProjectType == 2 & LOTHUniverse == "Yes")) {
+      idx <- which.max(if_else(ProjectType == 2 & LOTHUniverse == "Yes", EntryDate, as.Date(NA)))
+      EnrollmentID[idx]
+    } else {
+      NA_character_
+    },
+    
+    MostRecentTH_DateToStreetESSH = if (any(ProjectType == 2 & LOTHUniverse == "Yes")) {
+      idx <- which.max(if_else(ProjectType == 2 & LOTHUniverse == "Yes", EntryDate, as.Date(NA)))
+      DateToStreetESSH[idx]
+    } else {
+      as.Date(NA)
+    }
+  ) %>%
+  ungroup()
+
+
+
+
+###Step 6: Find the most recent PH Entry date
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(PersonalID) %>%
+  mutate(
+    MostRecentPH = if (any(ProjectType %in% c(3, 9, 10, 13) & LOTHUniverse == "Yes")) {
+      idx <- which.max(if_else(ProjectType %in% c(3, 9, 10, 13) & LOTHUniverse == "Yes", EntryDate, as.Date(NA)))
+      EntryDate[idx]
+    } else {
+      as.Date(NA)
+    },
+    
+    MostRecentPHEnrollmentID = if (any(ProjectType %in% c(3, 9, 10, 13) & LOTHUniverse == "Yes")) {
+      idx <- which.max(if_else(ProjectType %in% c(3, 9, 10, 13) & LOTHUniverse == "Yes", EntryDate, as.Date(NA)))
+      EnrollmentID[idx]
+    } else {
+      NA_character_
+    },
+    
+    MostRecentPH_DateToStreetESSH = if (any(ProjectType %in% c(3, 9, 10, 13) & LOTHUniverse == "Yes")) {
+      idx <- which.max(if_else(ProjectType %in% c(3, 9, 10, 13) & LOTHUniverse == "Yes", EntryDate, as.Date(NA)))
+      DateToStreetESSH[idx]
+    } else {
+      as.Date(NA)
+    }
+  ) %>%
+  ungroup()
+
+###Step 7: Find most recent ES, TH, or PH
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(PersonalID) %>%
+  mutate(
+    max_ES = if (all(is.na(MostRecentES))) as.Date(NA) else max(MostRecentES, na.rm = TRUE),
+    max_TH = if (all(is.na(MostRecentTH))) as.Date(NA) else max(MostRecentTH, na.rm = TRUE),
+    max_PH = if (all(is.na(MostRecentPH))) as.Date(NA) else max(MostRecentPH, na.rm = TRUE),
+    
+    MostRecentLOTH = pmax(max_ES, max_TH, max_PH, na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+
+
+
+
+### Step 8: Count Days in ES Projects WORKS
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(LOS_ES = case_when(
+    # If ProjectType is NOT 0, 1, or 8, set LOS_ES to NA
+    !(ProjectType %in% c(0, 1, 8)) ~ NA_real_,
+    
+    # If EntryDate is not within the reporting period, set to NA
+    EntryDate < ReportStartDate | EntryDate > ReportEndDate ~ NA_real_,
+    
+    # If EntryDate equals ExitDate, LOS_ES = 1
+    EntryDate == ExitDate ~ 1,
+    
+    # If EntryDate equals ReportEndDate, LOS_ES = 1
+    EntryDate == ReportEndDate ~ 1,
+    
+    # If ExitDate is NULL (still enrolled), count days from EntryDate to ReportEndDate
+    is.na(ExitDate) ~ as.numeric(ReportEndDate - EntryDate),
+    
+    # Otherwise, count days between EntryDate and ExitDate
+    TRUE ~ as.numeric(ExitDate - EntryDate)
+  ))
+
+
+### Step 9: Find total days WORKS
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(PersonalID) %>%
+  mutate(LOS_ESTotal = sum(LOS_ES, na.rm = TRUE)) %>%
+  ungroup()
+
+###Step 10: Count days in TH projects WORKS
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(LOS_TH = case_when(
+    # Only calculate for ProjectType 2, otherwise set to NA
+    ProjectType != 2 ~ NA_real_,
+    
+    # If EntryDate is not within the reporting period, set to NA
+    EntryDate < ReportStartDate | EntryDate > ReportEndDate ~ NA_real_,
+    
+    # If EntryDate equals ExitDate, LOS_TH = 1
+    EntryDate == ExitDate ~ 1,
+    
+    # If EntryDate equals ReportEndDate, LOS_TH = 1
+    EntryDate == ReportEndDate ~ 1,
+    
+    # If ExitDate is NULL (still enrolled), count days from EntryDate to ReportEndDate
+    is.na(ExitDate) ~ as.numeric(ReportEndDate - EntryDate),
+    
+    # Otherwise, count days between EntryDate and ExitDate
+    TRUE ~ as.numeric(ExitDate - EntryDate)
+  ))
+
+### Step 11: Find total days WORKS
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(PersonalID) %>%
+  mutate(LOS_THTotal = sum(LOS_TH, na.rm = TRUE)) %>%
+  ungroup()
+
+# Step 12: Add LOS_PH column based on conditions WORKS
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(LOS_PH = case_when(
+    # Only calculate for ProjectType 3, 9, 10, or 13, leave others as NA
+    !(ProjectType %in% c(3, 9, 10, 13)) ~ NA_real_,
+    
+    # If ValidHMID == "Yes", count days from EntryDate to MoveInDate
+    ValidHMID == "Yes" ~ as.numeric(MoveInDate - EntryDate),
+    
+    # If ValidHMID is "No" or NULL, calculate LOS_PH as per EntryDate and ExitDate logic
+    (ValidHMID == "No" | is.na(ValidHMID)) & EntryDate < ReportStartDate ~ NA_real_,
+    
+    # If EntryDate equals ExitDate, LOS_PH = 1
+    (ValidHMID == "No" | is.na(ValidHMID)) & EntryDate == ExitDate ~ 1,
+    
+    # If ExitDate is NULL (still enrolled), count days from EntryDate to ReportEnd2024
+    (ValidHMID == "No" | is.na(ValidHMID)) & is.na(ExitDate) ~ as.numeric(ReportEndDate - EntryDate),
+    
+    # Otherwise, count days between EntryDate and ExitDate
+    (ValidHMID == "No" | is.na(ValidHMID)) ~ as.numeric(ExitDate - EntryDate),
+    
+    # Default case
+    TRUE ~ NA_real_
+  ))
+
+
+### Step 13: Find total PH days WORKS
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(PersonalID) %>%
+  mutate(LOS_PHTotal = sum(LOS_PH, na.rm = TRUE)) %>%
+  ungroup()
+
+### Step 14: Count days in ES, TH, PH
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(
+    # Emergency Shelter (ES)
+    LOS_ES = case_when(
+      !(ProjectType %in% c(0, 1, 8)) ~ NA_real_,
+      EntryDate < ReportStartDate | EntryDate > ReportEndDate ~ NA_real_,
+      EntryDate == ExitDate | EntryDate == ReportEndDate ~ 1,
+      is.na(ExitDate) ~ as.numeric(ReportEndDate - EntryDate),
+      TRUE ~ as.numeric(ExitDate - EntryDate)
+    ),
+    
+    # Transitional Housing (TH)
+    LOS_TH = case_when(
+      ProjectType != 2 ~ NA_real_,
+      EntryDate < ReportStartDate | EntryDate > ReportEndDate ~ NA_real_,
+      EntryDate == ExitDate | EntryDate == ReportEndDate ~ 1,
+      is.na(ExitDate) ~ as.numeric(ReportEndDate - EntryDate),
+      TRUE ~ as.numeric(ExitDate - EntryDate)
+    ),
+    
+    # Permanent Housing (PH)
+    LOS_PH = case_when(
+      !(ProjectType %in% c(3, 9, 10, 13)) ~ NA_real_,
+      ValidHMID == "Yes" ~ as.numeric(MoveInDate - EntryDate),
+      (ValidHMID == "No" | is.na(ValidHMID)) & EntryDate < ReportStartDate ~ NA_real_,
+      (ValidHMID == "No" | is.na(ValidHMID)) & EntryDate == ExitDate ~ 1,
+      (ValidHMID == "No" | is.na(ValidHMID)) & is.na(ExitDate) ~ as.numeric(ReportEndDate - EntryDate),
+      (ValidHMID == "No" | is.na(ValidHMID)) ~ as.numeric(ExitDate - EntryDate),
+      TRUE ~ NA_real_
+    )
+  )
+
+###Step 15: Sum days
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(PersonalID) %>%
+  mutate(
+    LOS_ESTotal = sum(LOS_ES, na.rm = TRUE),
+    LOS_THTotal = sum(LOS_TH, na.rm = TRUE),
+    LOS_PHTotal = sum(LOS_PH, na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+###Step 16: Determine most recent LOTH
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(
+    DaysHomelessInProject = case_when(
+      MostRecentLOTH == MostRecentES ~ LOS_ESTotal,
+      MostRecentLOTH == MostRecentTH ~ LOS_THTotal,
+      MostRecentLOTH == MostRecentPH ~ LOS_PHTotal,
+      TRUE ~ NA_real_
+    ),
+    
+    MostRecentType = case_when(
+      MostRecentLOTH == MostRecentES ~ "ES",
+      MostRecentLOTH == MostRecentTH ~ "TH",
+      MostRecentLOTH == MostRecentPH ~ "PH",
+      TRUE ~ NA_character_
+    )
+  )
+
+###Step 17: If Date To Street ESSH is missing, make it equal to MostRecentLOTH
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(
+    ApproxLOTH = case_when(
+      LOTHUniverse == "Yes" & MostRecentLOTH == MostRecentES ~ MostRecentES_DateToStreetESSH,
+      LOTHUniverse == "Yes" & MostRecentLOTH == MostRecentTH ~ MostRecentTH_DateToStreetESSH,
+      LOTHUniverse == "Yes" & MostRecentLOTH == MostRecentPH ~ MostRecentPH_DateToStreetESSH,
+      TRUE ~ as.Date(NA)
+    )
+  )
+
+###Step 18: Propogate approx date homelessness started to other HH 
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(HouseholdID) %>%
+  mutate(ApproxLOTH = ApproxLOTH[RelationshipToHoH == 1][1],
+  ) %>%
+  ungroup()
+
+
+
+###Step 19: Calculate days homeless before entry
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(
+    DaysHomelessBeforeEntry = case_when(
+      EntryDate == MostRecentLOTH & !is.na(ApproxLOTH) ~ pmax(0, as.numeric(EntryDate - ApproxLOTH)),
+      TRUE ~ NA_real_
+    )
+  )
+
+###Step 20: Find LOTH
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(
+    LOTH = case_when(
+      is.na(DaysHomelessBeforeEntry) & is.na(DaysHomelessInProject) ~ NA_real_,
+      TRUE ~ coalesce(DaysHomelessBeforeEntry, 0) + coalesce(DaysHomelessInProject, 0)
+    )
+  )
