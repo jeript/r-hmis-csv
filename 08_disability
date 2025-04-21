@@ -1,0 +1,33 @@
+library(dplyr)
+library(lubridate)
+
+###Disabilities Prep
+###Keep only disabilities at Stage 1
+
+### STEP 1
+Disabilities_Data <- Disabilities_Data %>% 
+  filter(DataCollectionStage == 1 & DisabilityResponse != 0)
+
+
+### STEP 2
+### Add Disability Descriptions
+Disabilities_Data <- Disabilities_Data %>%
+  mutate(DisabilityDescription = disability_type(DisabilityType))
+
+
+###STEP 3
+###Remove columns
+Disabilities_Data <- Disabilities_Data %>%
+  select(-DisabilitiesID, -DisabilityType, -DisabilityResponse, -DataCollectionStage, -InformationDate)
+
+Disabilities_filtered <- Disabilities %>%
+  filter(
+    EntryDate <= as.Date("2025-03-31") &
+      (is.na(ExitDate) | ExitDate >= as.Date("2021-01-01"))
+  )
+
+
+Disabilities_filtered <- merge(Client_Entry_Data[, c("EnrollmentID", "EntryDate", "ExitDate")], 
+                     Disabilities_Data, 
+                     by = "EnrollmentID", 
+                     all.y = TRUE)
