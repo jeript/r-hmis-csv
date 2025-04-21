@@ -1,0 +1,96 @@
+library(dplyr)
+
+
+
+###Disabling Condition
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(DisabCH = ifelse(DisablingCondition == 1, "Yes", "No"))
+
+###Calculate Days Homeless between Approximate Date and Entry Date
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(ApproxDaysBetween = as.numeric(difftime(Client_Entry_Data$EntryDate, 
+                                                 Client_Entry_Data$DateToStreetESSH, units = "days")))
+
+###Approximate Date Homelessness Started
+Client_Entry_Data  <- Client_Entry_Data  %>%
+  mutate(ApproxCH = ifelse(ApproxDaysBetween >= 365, "Yes", "No"))
+
+###Length of Stay (3.917.2) values less than 7 nights for Temporary Living Situations
+Client_Entry_Data  <-Client_Entry_Data  %>%
+  mutate(LengthTempCH = ifelse(LengthOfStay %in% c(10, 11), "Yes", "No"))
+
+###Length of Stay (3.917.2) values less than 90 days for Temporary Living Situations
+Client_Entry_Data  <- Client_Entry_Data  %>%
+  mutate(LengthInsCH = ifelse(LengthOfStay %in% c(2, 3, 10, 11), "Yes", "No"))
+
+###Months Homeless (3.917.5) Past 3 years
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(MonthsCH = ifelse(MonthsHomelessPastThreeYears %in% c(112, 113), "Yes", "No"))
+
+###Times Homeless (3.917.4) Past 3 years
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(TimesCH = ifelse(TimesHomelessPastThreeYears %in% c(4), "Yes", "No"))
+
+###Prior Living Situation (3.12.1) for Homeless Situations
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(LivingSitCH = ifelse(LivingSituation %in% c(116, 101, 118), "Yes", "No"))
+
+###Prior Living Situation (3.12.1) for Institutional Situations
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(LivingSitInsCH = ifelse(LivingSituation %in% c(215, 206, 207, 225, 204, 205), "Yes", "No"))
+
+
+###Prior Living Situation (3.12.1) for Temporary Situations
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(LivingSitTempCH = ifelse(LivingSituation %in% c(8, 9, 99, 302, 329, 314, 332, 312, 313, 327, 336, 335), "Yes", "No"))
+
+
+###Homeless Prior to Temporary or Institutional Situation
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(PreviousInsCH = ifelse(PreviousStreetESSH %in% c(1), "Yes", "No"))
+
+
+
+
+
+# Define the ProjectType values to check
+ch_project_types <- c(0, 1, 2, 3, 4, 8, 9, 10, 11, 13, 14)
+
+Client_Entry_Data <- Client_Entry_Data %>% 
+  group_by(EnrollmentID) %>%
+  mutate(
+    Chronic_Condition1 = ifelse(
+      ProjectType %in% ch_project_types &
+        DisabCH == "Yes" &
+        LivingSitCH == "Yes" &
+        (
+          ApproxCH == "Yes" |
+            ((ApproxCH %in% c("No", NA)) & TimesCH == "Yes" & MonthsCH == "Yes")
+        ), "Yes", "No"),
+    
+    Chronic_Condition2 = ifelse(
+      ProjectType %in% ch_project_types &
+        DisabCH == "Yes" &
+        LivingSitInsCH == "Yes" &
+        LengthInsCH == "Yes" &
+        PreviousInsCH == "Yes" &
+        ((ApproxCH %in% c("No", NA)) & TimesCH == "Yes" & MonthsCH == "Yes"), "Yes", "No"),
+    
+    Chronic_Condition3 = ifelse(
+      ProjectType %in% ch_project_types &
+        DisabCH == "Yes" &
+        LivingSitTempCH == "Yes" &
+        LengthTempCH == "Yes" &
+        PreviousInsCH == "Yes" &
+        (
+          ApproxCH == "Yes" |
+            ((ApproxCH %in% c("No", NA)) & TimesCH == "Yes" & MonthsCH == "Yes")
+        ), "Yes", "No"),
+    
+    Chronic = ifelse(Chronic_Condition1 == "Yes" | Chronic_Condition2 == "Yes" | Chronic_Condition3 == "Yes", "Yes", "No")
+  )
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(HouseholdID) %>%
+  mutate(Chronic = ifelse(any(ClientAge >= 18 & Chronic == "Yes"), "Yes", Chronic)) %>%
+  ungroup()
