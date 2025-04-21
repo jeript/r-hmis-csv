@@ -1,0 +1,27 @@
+library(lubridate)
+library(dplyr)
+
+###Propogate Move In to HH
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(HouseholdID) %>%
+  mutate(MoveInDate = MoveInDate[RelationshipToHoH == 1][1]) %>%
+  ungroup()
+
+### Find Valid HMID
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(ValidHMID = ifelse(is.na(MoveInDate) | (MoveInDate >= EntryDate & ProjectType %in% ph_project_types & RelationshipToHoH == 1), 
+                            ifelse(is.na(MoveInDate), "No", "Yes"), 
+                            "No"))
+
+### Assign Valid HMID to all household members
+Client_Entry_Data <- Client_Entry_Data %>%
+  group_by(HouseholdID) %>%
+  mutate(ValidHMID = ValidHMID[RelationshipToHoH == 1][1]) %>%
+  ungroup()
+
+Client_Entry_Data <- Client_Entry_Data %>%
+  mutate(EntryToHMID = ifelse(ProjectType %in% c(3, 9, 10, 13) & 
+                                ValidHMID == "Yes" & 
+                                !is.na(MoveInDate),
+                              as.numeric(difftime(MoveInDate, EntryDate, units = "days")),
+                              NA))
