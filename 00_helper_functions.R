@@ -36,9 +36,11 @@ living_situation <- function(ReferenceNo) {
   )
 }
 
+
+
 extended_living_situation <- function(ReferenceNo) {
   case_when(
-    ReferenceNo %in% c(8, 9, 17, 24, 30, 37, 99) ~ "Other Living Situations",
+    ReferenceNo %in% c(8, 9, 17, 24, 30, 37, 99) | is.na(ReferenceNo) ~ "Other Living Situations",
     ReferenceNo %in% c(101, 116, 118) ~ "Homeless Situations",
     ReferenceNo %in% c(204, 205, 206, 207, 225, 215) ~ "Institutional Situations",
     ReferenceNo %in% c(327, 302, 332, 329, 314, 313, 335, 336) ~ "Temporary Housing Situations",
@@ -79,6 +81,23 @@ project_type <- function(ReferenceNo){
     ReferenceNo == 12 ~ "Prevention",
     ReferenceNo == 13 ~ "Rapid Rehousing",
     ReferenceNo == 14 ~ "Coordinated Entry"
+  )
+}
+
+project_type_ext <- function(ReferenceNo) {
+  case_when(
+    ReferenceNo %in% c(0, 1) ~ "Emergency Shelter",
+    ReferenceNo == 2 ~ "Transitional Housing",
+    ReferenceNo %in% c(3, 9, 10) ~ "Permanent Housing",
+    ReferenceNo == 4 ~ "Street Outreach",
+    ReferenceNo == 6 ~ "Services Only",
+    ReferenceNo == 7 ~ "Other",
+    ReferenceNo == 8 ~ "Safe Haven",
+    ReferenceNo == 11 ~ "Day Shelter",
+    ReferenceNo == 12 ~ "Homelessness Prevention",
+    ReferenceNo == 13 ~ "Rapid Re-Housing",
+    ReferenceNo == 14 ~ "Coordinated Entry",
+    TRUE ~ "Unknown"
   )
 }
 
@@ -127,6 +146,14 @@ rrh_subtype <- function(ReferenceNo){
   case_when(
     ReferenceNo == 1 ~ "RRH: Services only",
     ReferenceNo == 2 ~ "RRH: Housing with or without services"
+  )
+}
+
+housing_type <- function(ReferenceNo){
+  case_when(
+    ReferenceNo == 1 ~ "Site-based: single site",
+    ReferenceNo == 2 ~ "Site-based: clustered/multiple sites",
+    ReferenceNo == 3 ~ "Tenant-based: scattered site",
   )
 }
 
@@ -253,7 +280,7 @@ event_type <- function(ReferenceNo){
     ReferenceNo == 15	~ "Referral to Other PH project/unit/resource opening",
     ReferenceNo == 16	~ "Referral to emergency assistance/flex fund/furniture assistance",
     ReferenceNo == 18	~ "Referral to a Housing Stability Voucher"
-     )
+  )
 }
 
 result_type <- function(ReferenceNo){
